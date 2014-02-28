@@ -9,6 +9,7 @@ You will find this directory on every GitMachine.
 
 # Directory Structure
 
+```
 audit
   |
   +-- reports
@@ -18,7 +19,7 @@ audit
         +-- ssg
               |
               +-- content
-
+```
 
 reports - Reports and other output of audit scans
 
