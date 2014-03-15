@@ -28,12 +28,12 @@ Vagrant.configure("2") do |config|
 
 
   # Install scap
-  config.vm.provision :shell, :path => "templates/srv/govready/audit/resources/scripts/scap-install.sh"
+  #config.vm.provision :shell, :path => "templates/srv/govready/audit/resources/scripts/scap-install.sh"
 
   # Run simple scap test
-  config.vm.provision :shell, :path => "templates/srv/govready/audit/resources/scripts/oscap-rhel6-test2.sh"
+  #config.vm.provision :shell, :path => "templates/srv/govready/audit/resources/scripts/oscap-rhel6-test2.sh"
 
   # Run stig-rhel6-server scap test
-  config.vm.provision :shell, :path => "templates/srv/govready/audit/resources/scripts/oscap-rhel6.sh"
+  #config.vm.provision :shell, :path => "templates/srv/govready/audit/resources/scripts/oscap-rhel6.sh"
 
 end

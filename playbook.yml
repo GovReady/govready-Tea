@@ -1,49 +1,39 @@
 ---
- - hosts: all
-   
-   vars:
-     useComposer: true
-   
+- hosts: all
 
-   handlers:
+  vars:
+    useComposer: true
 
-   - name: restart iptables
-     service: name=iptables state=restarted
+  handlers:
 
-   - name: restart httpd
-     service: name=httpd state=restarted
+  - name: restart iptables
+    service: name=iptables state=restarted
 
-   
-   tasks: 
+  - name: restart httpd
+    service: name=httpd state=restarted
 
-   - name: copy firewall template
-     copy: src=templates/etc/sysconfig/iptables dest=/etc/sysconfig/iptables owner=root group=root mode=0600
-     notify: restart iptables
+  tasks: 
 
-   - name: Install http and php etc
-     yum: pkg={{ item }} state=installed
-     with_items:
-        - httpd
-        - php
-        - php-common
-        - php-xml
-        - php-mysql
-        - php-gd
-        - php-tidy
-        - php-pear
+  - name: copy firewall template
+    copy: src=templates/etc/sysconfig/iptables dest=/etc/sysconfig/iptables owner=root group=root mode=0600
+    notify: restart iptables
 
-   - name: Copy default virtual server
-     copy: src=templates/etc/httpd/conf.d/govready.conf dest=/etc/httpd/conf.d/govready.conf
-     notify: restart httpd
+  - name: Install http
+    yum: pkg={{ item }} state=installed
+    with_items:
+      - httpd
 
-   - name: Ensure Apache running
-     service: name=httpd state=started enabled=yes
+  - name: Copy default virtual server
+    copy: src=templates/etc/httpd/conf.d/govready.conf dest=/etc/httpd/conf.d/govready.conf
+    notify: restart httpd
 
-   - name: Install git
-     yum: pkg=git state=installed
+  - name: Ensure Apache running
+    service: name=httpd state=started enabled=yes
 
-   - name: Copy /srv/govready files
-     copy: src=templates/srv/govready dest=/srv
+  - name: Install git
+    yum: pkg=git state=installed
+
+  # vagrant #   copy: src=templates/srv/govready dest=/srv
 
    # - name: install composer
    #   shell: >
@@ -57,9 +47,83 @@
 
   # Install project specific software
 
-   - name: Copy default virtual server
-     copy: src=templates/etc/httpd/conf.d/10-app.conf dest=/etc/httpd/conf.d/10-app.conf
-     notify: restart httpd
+  - name: Copy default virtual server
+    copy: src=templates/etc/httpd/conf.d/10-app.conf dest=/etc/httpd/conf.d/10-app.conf
+    notify: restart httpd
 
+  - name: Install Tea prequisites
+    yum: pkg={{ item }} state=installed
+    with_items:
+      - autoconf
+      - automake
+      - libtool
+    sudo: True
+
+  - name: Install more Tea prequisites
+    yum: pkg={{ item }} state=installed
+    with_items:
+      - make 
+      - gcc
+      - gsl-devel
+    sudo: True
+
+  - name: Download Apophenia
+    get_url: url=http://klemens.org/asst/apop.tgz dest=/home/vagrant mode=755
+
+  - name: Quietly untar Apophenia overwriting the previous dir
+    command: tar -zxf /home/vagrant/apop.tgz --overwrite --overwrite-dir
+
+  - name: Ensure Apophenia is installed
+    action: command {{ item }} chdir=/home/vagrant/apophenia-0.998
+    with_items:
+      - ./configure
+      - make
+      - make install
+    sudo: True
+
+  # Install R
+  
+  - name: Add epel RPM repository CentOS 6
+    shell: su -c 'rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'
+
+  - name: Update yum
+    shell: yum update -y
+    sudo: True
+
+  - name: Install R from rpm
+    shell: yum install R -y
+    sudo: True
+
+  - name: Create rlibs directory
+    shell: mkdir /home/vagrant/root/share/rlibs -p
+
+  - name: Install R Libraries
+    shell: echo "R_LIBS=/home/vagrant/root/share/rlibs" > ~/.Renviron
+
+  - name: Install R Libraries step 2
+    shell: R -e 'install.packages(c("gam", "ggplot2", "RSQLite", "multicore", "MCMCpack", "gdata", "tree", "testthat"), lib="/home/vagrant/root/share/rlibs", repos="http://cran.fhcrc.org")'
+
+  - name: Download Rapophenia
+    get_url: url=http://klemens.org/asst/rapop.tgz dest=/home/vagrant mode=755
+
+  - name: Quietly untar Rapophenia overwriting the previous dir
+    command: tar -zxf /home/vagrant/rapop.tgz --overwrite --overwrite-dir
+
+  - name: Ensure Rapophenia is installed
+    shell: R CMD INSTALL -l /home/vagrant/root/share/rlibs ./ chdir=/home/vagrant/Rapophenia
+
+  # Install Tea
+
+  - name: Download Tea
+    get_url: url=http://klemens.org/asst/tea.tgz dest=/home/vagrant mode=755
+
+  - name: Quietly untar Tea overwriting the previous dir
+    command: tar -zxf /home/vagrant/tea.tgz --overwrite --overwrite-dir
+
+  - name: Ensure Tea is installed build
+    shell: R CMD build ./ chdir=/home/vagrant/tea
+
+  - name: Ensure Tea is installed install
+    shell: R CMD INSTALL -l /home/vagrant/root/share/rlibs ./ chdir=/home/vagrant/tea
 
 
