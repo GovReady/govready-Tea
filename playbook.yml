@@ -68,13 +68,13 @@
     sudo: True
 
   - name: Download Apophenia
-    get_url: url=http://klemens.org/asst/apop.tgz dest=/home/vagrant mode=755
+    get_url: url=http://softlayer-ams.dl.sourceforge.net/project/apophenia/apophenia-0.999-19_Mar_14.tgz dest=/home/vagrant mode=755
 
   - name: Quietly untar Apophenia overwriting the previous dir
-    command: tar -zxf /home/vagrant/apop.tgz --overwrite --overwrite-dir
+    command: tar -zxf /home/vagrant/apophenia-0.999-19_Mar_14.tgz --overwrite --overwrite-dir
 
   - name: Ensure Apophenia is installed
-    action: command {{ item }} chdir=/home/vagrant/apophenia-0.998
+    action: command {{ item }} chdir=/home/vagrant/apophenia-0.999
     with_items:
       - ./configure
       - make
@@ -86,9 +86,9 @@
   - name: Add epel RPM repository CentOS 6
     shell: su -c 'rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'
 
-  - name: Update yum
-    shell: yum update -y
-    sudo: True
+   #  - name: Update yum
+   # shell: yum update -y
+   # sudo: True
 
   - name: Install R from rpm
     shell: yum install R -y
