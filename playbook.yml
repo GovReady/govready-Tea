@@ -94,14 +94,14 @@
     shell: yum install R -y
     sudo: True
 
-  - name: Create rlibs directory
-    shell: mkdir /home/vagrant/root/share/rlibs -p
+  #- name: Create rlibs directory
+  #  shell: mkdir /home/vagrant/root/share/rlibs -p
 
-  - name: Install R Libraries
-    shell: echo "R_LIBS=/home/vagrant/root/share/rlibs" > ~/.Renviron
+  #- name: Install R Libraries
+  #  shell: echo "R_LIBS=/home/vagrant/root/share/rlibs" > ~/.Renviron
 
   - name: Install R Libraries step 2
-    shell: R -e 'install.packages(c("gam", "ggplot2", "RSQLite", "multicore", "MCMCpack", "gdata", "tree", "testthat"), lib="/home/vagrant/root/share/rlibs", repos="http://cran.fhcrc.org")'
+    shell: R -e 'install.packages(c("gam", "ggplot2", "RSQLite", "multicore", "MCMCpack", "gdata", "tree", "testthat"), repos="http://watson.nci.nih.gov/cran_mirror/")'
 
   - name: Download Rapophenia
     get_url: url=http://klemens.org/asst/rapop.tgz dest=/home/vagrant mode=755
@@ -110,7 +110,7 @@
     command: tar -zxf /home/vagrant/rapop.tgz --overwrite --overwrite-dir
 
   - name: Ensure Rapophenia is installed
-    shell: R CMD INSTALL -l /home/vagrant/root/share/rlibs ./ chdir=/home/vagrant/Rapophenia
+    shell: R CMD INSTALL ./ chdir=/home/vagrant/Rapophenia
 
   # Install Tea
 
@@ -120,10 +120,9 @@
   - name: Quietly untar Tea overwriting the previous dir
     command: tar -zxf /home/vagrant/tea.tgz --overwrite --overwrite-dir
 
-  - name: Ensure Tea is installed build
+  - name: Ensure Tea is installed---build
     shell: R CMD build ./ chdir=/home/vagrant/tea
 
-  - name: Ensure Tea is installed install
-    shell: R CMD INSTALL -l /home/vagrant/root/share/rlibs ./ chdir=/home/vagrant/tea
-
+  - name: Ensure Tea is installed---install
+    shell: R CMD INSTALL ./ chdir=/home/vagrant/tea
 
