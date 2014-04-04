@@ -94,25 +94,32 @@
     shell: yum install R -y
     sudo: True
 
-  #- name: Create rlibs directory
-  #  shell: mkdir /home/vagrant/root/share/rlibs -p
-
-  #- name: Install R Libraries
-  #  shell: echo "R_LIBS=/home/vagrant/root/share/rlibs" > ~/.Renviron
-
-  - name: Install R Libraries step 2
-    shell: R -e 'install.packages(c("gam", "ggplot2", "RSQLite", "multicore", "MCMCpack", "gdata", "tree", "testthat"), repos="http://watson.nci.nih.gov/cran_mirror/")'
-
   - name: Download Rapophenia
-    get_url: url=http://klemens.org/asst/rapop.tgz dest=/home/vagrant mode=755
+    get_url: url=https://github.com/rforge/rapophenia/archive/master.zip dest=/home/vagrant mode=755
 
   - name: Quietly untar Rapophenia overwriting the previous dir
-    command: tar -zxf /home/vagrant/rapop.tgz --overwrite --overwrite-dir
+    command: unzip master
 
-  - name: Ensure Rapophenia is installed
-    shell: R CMD INSTALL ./ chdir=/home/vagrant/Rapophenia
+  - name: Build Rapophenia 1/3
+    shell: cd /home/vagrant/rapophenia-master/Rapophenia && {{ item }}
+    with_items:
+        - mkdir -p Rapophenia/inst/doc
+        - mkdir -p Rapophenia/inst/include
+        - cp -r man R src tests Rapophenia
+        - cp -r pkging/* Rapophenia
+        - cp -r Rapophenia/src/*.h Rapophenia/inst/include/
 
-  # Install Tea
+  - name: Build Rapophenia 2/3
+    shell: cd /home/vagrant/rapophenia-master/Rapophenia/Rapophenia && autoconf && rm configure.ac && rm -r autom4te.cache
+
+  - name: Build Rapophenia 3/3
+    shell: cd /home/vagrant/rapophenia-master/Rapophenia/Rapophenia && R CMD build .
+
+  - name: Install Rapophenia
+    shell: cd /home/vagrant/rapophenia-master/Rapophenia/Rapophenia && R CMD INSTALL ./
+
+  - name: Install R Libraries
+    shell: R -e 'install.packages(c("gam", "ggplot2", "RSQLite", "multicore", "MCMCpack", "gdata", "tree", "testthat"), repos="http://watson.nci.nih.gov/cran_mirror/")'
 
   - name: Download Tea
     get_url: url=http://klemens.org/asst/tea.tgz dest=/home/vagrant mode=755
