@@ -100,36 +100,23 @@
   - name: Quietly untar Rapophenia overwriting the previous dir
     command: unzip master
 
-  - name: Build Rapophenia 1/3
-    shell: cd /home/vagrant/rapophenia-master/Rapophenia && {{ item }}
-    with_items:
-        - mkdir -p Rapophenia/inst/doc
-        - mkdir -p Rapophenia/inst/include
-        - cp -r man R src tests Rapophenia
-        - cp -r pkging/* Rapophenia
-        - cp -r Rapophenia/src/*.h Rapophenia/inst/include/
-
-  - name: Build Rapophenia 2/3
-    shell: cd /home/vagrant/rapophenia-master/Rapophenia/Rapophenia && autoconf && rm configure.ac && rm -r autom4te.cache
-
-  - name: Build Rapophenia 3/3
-    shell: cd /home/vagrant/rapophenia-master/Rapophenia/Rapophenia && R CMD build .
-
-  - name: Install Rapophenia
-    shell: cd /home/vagrant/rapophenia-master/Rapophenia/Rapophenia && R CMD INSTALL ./
+  - name: Build and install Rapophenia
+    shell: "cd /home/vagrant/rapophenia-master/Rapophenia && sed -i -e '/include ~\\/.Renviron/d' -e 's|-l ~/.Rlibs||' -e 's/: doc/:/' -e '/doc/d' makefile && make nocheck"
 
   - name: Install R Libraries
     shell: R -e 'install.packages(c("gam", "ggplot2", "RSQLite", "multicore", "MCMCpack", "gdata", "tree", "testthat"), repos="http://watson.nci.nih.gov/cran_mirror/")'
 
+  - name: Install parser generator
+    yum: pkg={{ item }} state=installed
+    with_items:
+      - bison
+      - flex
+
   - name: Download Tea
-    get_url: url=http://klemens.org/asst/tea.tgz dest=/home/vagrant mode=755
+    get_url: url=https://github.com/rforge/tea/archive/master.zip dest=/home/vagrant mode=755
 
   - name: Quietly untar Tea overwriting the previous dir
-    command: tar -zxf /home/vagrant/tea.tgz --overwrite --overwrite-dir
+    command: unzip master
 
-  - name: Ensure Tea is installed---build
-    shell: R CMD build ./ chdir=/home/vagrant/tea
-
-  - name: Ensure Tea is installed---install
-    shell: R CMD INSTALL ./ chdir=/home/vagrant/tea
-
+  - name: Build and install Tea
+    shell: cd /home/vagrant/tea-master && sed -i -e '/include ~\/.Renviron/d' -e 's|-l ~/.Rlibs||' makefile && make nodoc
