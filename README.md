@@ -11,7 +11,7 @@ A GovReady GitMachine for TEA
 
 ## Goals
 
-Make it easier to distribute and use Ben Klemens TEA data survey tool
+Make it easier to distribute and use Ben Klemens and Rolando Rodríguez's TEA data survey tool
 
 ben.klemens@census.gov
 

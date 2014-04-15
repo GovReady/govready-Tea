@@ -51,20 +51,19 @@
     copy: src=templates/etc/httpd/conf.d/10-app.conf dest=/etc/httpd/conf.d/10-app.conf
     notify: restart httpd
 
-  - name: Install Tea prequisites
-    yum: pkg={{ item }} state=installed
-    with_items:
-      - autoconf
-      - automake
-      - libtool
-    sudo: True
-
-  - name: Install more Tea prequisites
+  - name: Install build prequisites
     yum: pkg={{ item }} state=installed
     with_items:
       - make 
       - gcc
       - gsl-devel
+      - sqlite-devel
+    sudo: True
+
+  - name: Install R devtools prequisites
+    yum: pkg={{ item }} state=installed
+    with_items:
+      - curl-devel
     sudo: True
 
   - name: Download Apophenia
@@ -81,8 +80,6 @@
       - make install
     sudo: True
 
-  # Install R
-  
   - name: Add epel RPM repository CentOS 6
     shell: su -c 'rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'
 
@@ -94,29 +91,11 @@
     shell: yum install R -y
     sudo: True
 
-  - name: Download Rapophenia
-    get_url: url=https://github.com/rforge/rapophenia/archive/master.zip dest=/home/vagrant mode=755
+  - name: Install R Libraries for Tea
+    shell: R -e 'install.packages(c("devtools", "ggplot2", "RSQLite", "multicore", "MCMCpack", "gdata", "tree", "testthat"), repos="http://watson.nci.nih.gov/cran_mirror/")'
 
-  - name: Quietly untar Rapophenia overwriting the previous dir
-    command: unzip master
+  - name: Download/install Rapophenia
+    shell: R -e 'library(devtools); install_github("b-k/Rapophenia", ref="pkg")'
 
-  - name: Build and install Rapophenia
-    shell: "cd /home/vagrant/rapophenia-master/Rapophenia && sed -i -e '/include ~\\/.Renviron/d' -e 's|-l ~/.Rlibs||' -e 's/: doc/:/' -e '/doc/d' makefile && make nocheck"
-
-  - name: Install R Libraries
-    shell: R -e 'install.packages(c("gam", "ggplot2", "RSQLite", "multicore", "MCMCpack", "gdata", "tree", "testthat"), repos="http://watson.nci.nih.gov/cran_mirror/")'
-
-  - name: Install parser generator
-    yum: pkg={{ item }} state=installed
-    with_items:
-      - bison
-      - flex
-
-  - name: Download Tea
-    get_url: url=https://github.com/rforge/tea/archive/master.zip dest=/home/vagrant mode=755
-
-  - name: Quietly untar Tea overwriting the previous dir
-    command: unzip master
-
-  - name: Build and install Tea
-    shell: cd /home/vagrant/tea-master && sed -i -e '/include ~\/.Renviron/d' -e 's|-l ~/.Rlibs||' makefile && make nodoc
+  - name: Download/install Tea
+    shell: R -e 'library(devtools); install_github("rodri363/tea", ref="pkg")'
