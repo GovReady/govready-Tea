@@ -5,6 +5,7 @@ GovReady-TEA
 
 | Date         | Status | Time to Build |
 |--------------|-------------|-------------|
+| June 18, 2014 Updated| VM OK. Install Tea OK. No SCAP. | real	27m11.885s; user 0m14.887s; sys 0m10.445s |
 | Mar 14, 2014 Updated| VM OK. Install Tea OK. No SCAP. | real 41m9.848s; user 0m14.815s; sys 0m11.125s |
 
 A GovReady GitMachine for TEA
