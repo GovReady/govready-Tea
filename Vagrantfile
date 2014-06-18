@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
   end
 
   # Set up synched folder for working on htm web app files on the host computer (also ensures the directory is created)
-  config.vm.synced_folder "app/", "/var/www/app/", id: "html  -root", create: true   
+  config.vm.synced_folder "app/", "/var/www/app/", create: true   
 
 
   # Install scap
